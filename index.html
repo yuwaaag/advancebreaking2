@@ -4,123 +4,192 @@
     <meta charset="UTF-8">
     <style>
         body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; }
-        #news-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.5; filter: blur(3px); transition: opacity 1s; }
-        .breaking-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; border: 10px solid #ffcc00; box-sizing: border-box; z-index: 10; }
-        .header-box { position: absolute; top: 50px; text-align: center; background: rgba(204, 0, 0, 0.9); padding: 20px 60px; border: 5px solid #ffcc00; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
-        .header-text { font-size: 80px; color: #fff; letter-spacing: 8px; margin: 0; }
-        .news-box { width: 100%; background: linear-gradient(to top, #000, rgba(0,0,0,0.8)); padding: 40px; border-top: 8px solid #ffcc00; }
-        .news-text { font-size: 55px; color: #ffcc00; text-align: center; margin: 0; line-height: 1.2; font-weight: bold; }
-        #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: #ffcc00; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; cursor: pointer; text-align: center; }
+        
+        /* बैकग्राउंड और एनिमेशन */
+        #news-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; filter: blur(4px); transition: transform 10s linear; }
+        .zoom-effect { transform: scale(1.1); }
+
+        .studio-overlay {
+            position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, #000 100%);
+            z-index: 5;
+        }
+
+        /* मेन कंटेनर */
+        .breaking-container { 
+            position: relative; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 10; 
+        }
+
+        /* ब्रेकिंग न्यूज़ हेडर */
+        .header-box { 
+            background: linear-gradient(90deg, #cc0000 0%, #ff0000 50%, #cc0000 100%); 
+            padding: 15px 80px; transform: skewX(-20deg);
+            border: 4px solid #fff; box-shadow: 0 0 30px #ff0000;
+            margin-bottom: 40px; animation: slideDown 1s ease-out;
+        }
+        .header-text { 
+            font-size: 70px; color: #fff; letter-spacing: 5px; margin: 0; 
+            transform: skewX(20deg); text-shadow: 4px 4px 0px #000;
+        }
+
+        /* न्यूज़ टेक्स्ट बॉक्स */
+        .news-box { 
+            width: 90%; background: rgba(0, 0, 0, 0.8); 
+            padding: 30px; border-left: 15px solid #ffcc00; 
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+        }
+        .news-text { 
+            font-size: 50px; color: #fff; text-align: center; margin: 0; 
+            line-height: 1.4; font-weight: 400; font-family: 'Arial', sans-serif;
+        }
+
+        /* नीचे की पट्टी */
+        .ticker {
+            position: absolute; bottom: 0; width: 100%; background: #ffcc00; color: #000;
+            padding: 10px; font-size: 25px; font-weight: bold; text-align: center;
+            z-index: 20; letter-spacing: 2px;
+        }
+
+        /* स्टार्ट स्क्रीन */
+        #start-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; z-index: 1000; cursor: pointer; 
+        }
+        .play-btn {
+            font-size: 80px; color: #ffcc00; border: 5px solid #ffcc00;
+            border-radius: 50%; width: 120px; height: 120px;
+            display: flex; justify-content: center; align-items: center;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(255, 204, 0, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); } }
+        @keyframes slideDown { from { transform: translateY(-100px) skewX(-20deg); opacity: 0; } to { transform: translateY(0) skewX(-20deg); opacity: 1; } }
+
     </style>
 </head>
 <body>
 
-<div id="start-overlay" onclick="startAdvancedSystem()">
-    <h1 style="font-size: 60px;">PTN NEWS STUDIO</h1>
-    <p style="font-size: 30px; color: white;">क्लिक करें - साउंड और न्यूज़ शुरू करें</p>
-    <p style="font-size: 18px; color: #ffcc00;">(No-File Audio Engine Active)</p>
-</div>
-
-<img id="news-bg" src="" alt="Background">
-
-<div class="breaking-container">
-    <div class="header-box"><p class="header-text">BREAKING NEWS</p></div>
-    <div class="news-box">
-        <center><div style="background:#fff; color:#cc0000; padding:10px 30px; font-size:30px; font-weight:bold; border-radius:5px; margin-bottom:10px;">बड़ी खबर</div></center>
-        <p class="news-text" id="headline">कनेक्टिंग...</p>
+    <div id="start-overlay" onclick="startProMode()">
+        <div class="play-btn">▶</div>
+        <h2 style="color:white; margin-top: 20px;">TV MODE START</h2>
     </div>
-</div>
 
-<script>
-    let newsList = [];
-    let currentIndex = 0;
-    let audioCtx;
+    <img id="news-bg" src="https://via.placeholder.com/1920x1080/000000/333333?text=PTN+NEWS" alt="Background">
+    <div class="studio-overlay"></div>
 
-    // 🎵 न्यूज़ टोन पैदा करने वाला इंजन (बिना फाइल के)
-    function playNewsDrone() {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    <div class="breaking-container">
+        <div class="header-box"><h1 class="header-text">BREAKING NEWS</h1></div>
         
-        // एक गहरा न्यूज़ जैसा 'Hum' साउंड बनाने के लिए
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
+        <div class="news-box">
+            <span style="background: #cc0000; color: white; padding: 5px 15px; font-size: 20px; font-weight: bold; border-radius: 3px;">LIVE</span>
+            <p class="news-text" id="headline">सिस्टम तैयार हो रहा है...</p>
+        </div>
+    </div>
 
-        oscillator.type = 'sawtooth'; // न्यूज़ जैसी गंभीर आवाज़ के लिए
-        oscillator.frequency.setValueAtTime(50, audioCtx.currentTime); // गहरी बेस टोन
+    <div class="ticker">PTN DIGITAL • LUCKNOW • SUPERFAST NEWS NETWORK</div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://upload.wikimedia.org/wikipedia/commons/e/e6/News_Theme_Swish_hit_strings_perc.ogg" type="audio/ogg">
+    </audio>
+
+    <script>
+        let newsList = [];
+        let currentIndex = 0;
+        const bgMusic = document.getElementById('bgMusic');
+        const headlineEl = document.getElementById('headline');
+        const bgImg = document.getElementById('news-bg');
+
+        // 🔊 Base64 Sound Effect (बिना इंटरनेट चलेगा)
+        // यह एक छोटा "Whoosh" साउंड है
+        const whooshSound = new Audio("data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA=="); // Placeholder for short transition, real logic below uses synth for reliability if this fails but trying simple beep first.
         
-        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); // म्यूज़िक को हल्का रखें
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        oscillator.start();
-    }
-
-    // 🔔 ब्रेकिंग न्यूज़ ट्रांज़िशन साउंड (Whoosh)
-    function playTransitionSound() {
-        if(!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.5);
-        g.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-        osc.connect(g);
-        g.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.5);
-    }
-
-    async function fetchNews() {
-        const rssUrl = "https://www.bhaskar.com/rss-v1--category-1061.xml"; 
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-        try {
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-            if (data.status === 'ok') {
-                newsList = data.items;
-                showNextNews();
-            }
-        } catch (e) { console.log("Fetch Error"); }
-    }
-
-    function showNextNews() {
-        if (newsList.length === 0) return;
-        const item = newsList[currentIndex];
-
-        // ट्रांज़िशन साउंड बजाएं
-        playTransitionSound();
-
-        document.getElementById('headline').innerText = item.title;
-        if (item.enclosure && item.enclosure.link) {
-            document.getElementById('news-bg').src = item.enclosure.link;
+        // Actually, using a reliable frequency sweep for "Whoosh" is safer than long base64 strings in chat.
+        function playWhoosh() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(200, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.3); // आवाज ऊपर जाएगी
+            
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.3);
         }
 
-        speakNews(item.title);
+        async function fetchNews() {
+            const rssUrl = "https://www.bhaskar.com/rss-v1--category-1061.xml"; 
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+            try {
+                const res = await fetch(apiUrl);
+                const data = await res.json();
+                if(data.status === 'ok') {
+                    newsList = data.items;
+                    runNewsCycle();
+                }
+            } catch(e) { console.log("News Error"); }
+        }
 
-        currentIndex = (currentIndex + 1) % newsList.length;
-        setTimeout(showNextNews, 12000);
-    }
+        function runNewsCycle() {
+            if(newsList.length === 0) return;
+            const item = newsList[currentIndex];
 
-    function speakNews(text) {
-        window.speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance("ब्रेकिंग न्यूज़... " + text);
-        msg.lang = 'hi-IN';
-        msg.rate = 0.9;
-        window.speechSynthesis.speak(msg);
-    }
+            // 1. साउंड बजाएं
+            playWhoosh();
 
-    function startAdvancedSystem() {
-        document.getElementById('start-overlay').style.display = 'none';
-        
-        // म्यूज़िक इंजन शुरू करें
-        playNewsDrone();
-        
-        // न्यूज़ लाएं
-        fetchNews();
-    }
-</script>
+            // 2. टेक्स्ट और फोटो अपडेट
+            headlineEl.innerText = item.title;
+            if(item.enclosure && item.enclosure.link) {
+                bgImg.src = item.enclosure.link;
+                // फोटो को थोड़ा ज़ूम करें (Animation)
+                bgImg.classList.remove('zoom-effect');
+                void bgImg.offsetWidth; // Trigger reflow
+                bgImg.classList.add('zoom-effect');
+            }
 
+            // 3. म्यूजिक धीमा करें (Ducking)
+            bgMusic.volume = 0.1; 
+
+            // 4. खबर पढ़ें
+            const utter = new SpeechSynthesisUtterance("ब्रेकिंग न्यूज़... " + item.title);
+            utter.lang = 'hi-IN';
+            utter.rate = 0.9;
+            
+            utter.onend = () => {
+                // खबर खत्म होने पर म्यूजिक तेज़ करें
+                bgMusic.volume = 0.4;
+                
+                // 3 सेकंड रुककर अगली खबर
+                setTimeout(() => {
+                    currentIndex = (currentIndex + 1) % newsList.length;
+                    runNewsCycle();
+                }, 3000);
+            };
+
+            window.speechSynthesis.speak(utter);
+        }
+
+        function startProMode() {
+            document.getElementById('start-overlay').style.display = 'none';
+            
+            // म्यूजिक चालू करें
+            bgMusic.volume = 0.4;
+            bgMusic.play().catch(e => alert("Please click again to start audio"));
+            
+            fetchNews();
+            
+            // हर 5 मिनट में नई खबरें लाएं
+            setInterval(fetchNews, 300000);
+        }
+
+    </script>
 </body>
 </html>
