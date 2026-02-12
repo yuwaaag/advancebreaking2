@@ -5,51 +5,56 @@
     <style>
         body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; }
         
+        /* बैकग्राउंड विजुअल */
         #news-bg { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            object-fit: cover; opacity: 0.5; filter: brightness(0.6);
-            z-index: 1;
+            object-fit: cover; opacity: 0.4; filter: blur(5px);
+            z-index: 1; transition: opacity 1s;
         }
 
         .main-ui {
             position: relative; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: flex-end;
-            border: 10px solid #ffcc00; box-sizing: border-box; z-index: 10;
+            border: 15px solid #ffcc00; box-sizing: border-box; z-index: 10;
         }
 
+        /* ब्रेकिंग न्यूज़ एनीमेशन */
         .breaking-tag {
-            position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
-            background: #cc0000; color: white; padding: 20px 60px;
-            font-size: 80px; font-weight: bold; border: 5px solid #fff;
-            box-shadow: 0 0 30px #ff0000; animation: blink 1.5s infinite;
+            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(to bottom, #ff0000, #990000); 
+            color: white; padding: 20px 80px; font-size: 75px; 
+            border: 5px solid #fff; box-shadow: 0 0 40px #ff0000;
+            animation: bounce 2s infinite ease-in-out;
         }
 
+        /* न्यूज़ टेक्स्ट बॉक्स */
         .news-box {
-            width: 100%; background: linear-gradient(transparent, #000 30%);
-            padding: 60px 20px; text-align: center;
+            width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.95) 40%);
+            padding: 80px 30px; text-align: center;
         }
 
         .news-text {
-            font-size: 55px; color: #ffcc00; font-weight: bold;
-            text-shadow: 3px 3px 10px #000; margin: 0;
+            font-size: 58px; color: #ffcc00; font-weight: bold;
+            text-shadow: 4px 4px 15px #000; margin: 0; line-height: 1.2;
         }
 
+        /* स्टार्ट स्क्रीन */
         #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #ffcc00; display: flex;
-            justify-content: center; align-items: center; z-index: 1000;
-            cursor: pointer; font-size: 40px; text-align: center;
+            background: radial-gradient(circle, #222, #000); color: #ffcc00; 
+            display: flex; flex-direction: column; justify-content: center; 
+            align-items: center; z-index: 1000; cursor: pointer;
         }
 
-        @keyframes blink { 50% { opacity: 0.8; transform: translateX(-50%) scale(1.05); } }
+        @keyframes bounce { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } }
     </style>
 </head>
 <body>
 
-    <div id="start-screen" onclick="launchNews()">
-        <div style="border: 4px solid #ffcc00; padding: 50px;">
-            PTN NEWS STUDIO<br>
-            <span style="color:white; font-size: 20px;">[ क्लिक करें और शुरू करें ]</span>
+    <div id="start-screen" onclick="startAdvancedNews()">
+        <div style="border: 6px double #ffcc00; padding: 60px; text-align: center;">
+            <h1 style="margin:0; font-size: 60px;">PTN NEWS STUDIO</h1>
+            <p style="color: white; font-size: 24px;">[ यहाँ क्लिक करें - आवाज़ शुरू करें ]</p>
         </div>
     </div>
 
@@ -58,20 +63,38 @@
     <div class="main-ui">
         <div class="breaking-tag">BREAKING NEWS</div>
         <div class="news-box">
-            <p class="news-text" id="headline">खबरें लोड हो रही हैं...</p>
+            <p class="news-text" id="headline">सिस्टम कनेक्ट हो रहा है...</p>
         </div>
     </div>
-
-    <audio id="bgMusic" loop>
-        <source src="https://www.soundjay.com/free-music/sounds/action-movie-trailer-01.mp3" type="audio/mpeg">
-    </audio>
 
     <script>
         let newsList = [];
         let currentIndex = 0;
-        const bgMusic = document.getElementById('bgMusic');
-        const headlineEl = document.getElementById('headline');
-        const bgImg = document.getElementById('news-bg');
+        let audioCtx;
+
+        // 🎵 न्यूज़ "Beat" इंजन (No MP3 needed)
+        function playNewsBeat() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // यह फंक्शन हर 0.5 सेकंड में एक "धुप" की आवाज़ पैदा करेगा
+            setInterval(() => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine'; 
+                osc.frequency.setValueAtTime(60, audioCtx.currentTime); // गहरी बेस आवाज़
+                osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime); // वॉल्यूम
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            }, 600); // न्यूज़ टिक-टिक की रफ़्तार
+        }
 
         async function fetchNews() {
             const rssUrl = "https://www.bhaskar.com/rss-v1--category-1061.xml"; 
@@ -81,50 +104,49 @@
                 const data = await response.json();
                 if (data.status === 'ok') {
                     newsList = data.items;
-                    playLoop();
+                    runNewsCycle();
                 }
-            } catch (e) { headlineEl.innerText = "Check Connection..."; }
+            } catch (e) { document.getElementById('headline').innerText = "इंटरनेट एरर!"; }
         }
 
-        function playLoop() {
+        function runNewsCycle() {
             if (newsList.length === 0) return;
             const item = newsList[currentIndex];
 
-            // 1. स्क्रीन अपडेट
-            headlineEl.innerText = item.title;
+            // UI अपडेट
+            document.getElementById('headline').innerText = item.title;
             if (item.enclosure && item.enclosure.link) {
-                bgImg.src = item.enclosure.link;
+                document.getElementById('news-bg').src = item.enclosure.link;
             }
 
-            // 2. एंकर की आवाज़
+            // AI Voice
+            window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance("ब्रेकिंग न्यूज़... " + item.title);
             msg.lang = 'hi-IN';
             msg.rate = 0.9;
             
             msg.onend = () => {
-                // खबर खत्म होने के 4 सेकंड बाद अगली खबर
                 setTimeout(() => {
                     currentIndex = (currentIndex + 1) % newsList.length;
-                    playLoop();
-                }, 4000);
+                    runNewsCycle();
+                }, 3000);
             };
 
             window.speechSynthesis.speak(msg);
         }
 
-        function launchNews() {
-            // स्टार्ट स्क्रीन हटाएँ
+        function startAdvancedNews() {
             document.getElementById('start-screen').style.display = 'none';
             
-            // म्यूज़िक चालू करें (वॉल्यूम 30%)
-            bgMusic.volume = 0.3;
-            bgMusic.play();
+            // 1. न्यूज़ बीट शुरू करें (Internal)
+            playNewsBeat();
             
+            // 2. ताज़ा न्यूज़ लाएं
             fetchNews();
         }
 
-        // हर 10 मिनट में ताज़ा खबरें लोड करें
-        setInterval(fetchNews, 600000);
+        // हर 5 मिनट में ऑटो रिफ्रेश
+        setInterval(fetchNews, 300000);
     </script>
 </body>
 </html>
