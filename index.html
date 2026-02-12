@@ -2,82 +2,38 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTN NEWS STUDIO - Counter Active</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@700;900&display=swap');
-        
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Noto Sans Devanagari', sans-serif; }
         
-        #news-bg { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            object-fit: cover; opacity: 0.5; filter: brightness(0.4);
-            z-index: 1; transition: opacity 1.2s;
-        }
+        #news-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.4; filter: brightness(0.4); z-index: 1; transition: opacity 1s; }
+        .main-container { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; border: 12px solid #ffcc00; box-sizing: border-box; z-index: 10; }
 
-        .main-container {
-            position: relative; width: 100vw; height: 100vh;
-            display: flex; flex-direction: column; justify-content: flex-end;
-            border: 12px solid #ffcc00; box-sizing: border-box; z-index: 10;
-        }
+        .breaking-header { position: absolute; top: 50px; left: 0; background: #cc0000; color: white; padding: 15px 50px; font-size: 50px; font-weight: 900; border-right: 12px solid #ffcc00; z-index: 15; box-shadow: 10px 10px 20px rgba(0,0,0,0.5); }
+        .counter-box { position: absolute; top: 50px; right: 0; background: #000; color: #ffcc00; padding: 15px 30px; font-size: 30px; font-weight: 900; border-left: 10px solid #ffcc00; z-index: 15; }
 
-        /* टॉप हेडर: ब्रेकिंग न्यूज़ */
-        .breaking-header {
-            position: absolute; top: 50px; left: 0;
-            background: linear-gradient(90deg, #cc0000 0%, #ff0000 100%); 
-            color: white; padding: 15px 50px;
-            font-size: clamp(30px, 4vw, 60px); font-weight: 900;
-            border-right: 12px solid #ffcc00; box-shadow: 10px 10px 30px rgba(0,0,0,0.6);
-            z-index: 15;
-        }
+        .bottom-panel { width: 100%; background: linear-gradient(to top, #000 80%, transparent); padding: 50px 20px; border-top: 8px solid #ffcc00; }
+        .headline-text { font-size: 48px; color: #fff; text-align: center; margin: 0; line-height: 1.4; font-weight: 700; text-shadow: 2px 2px 10px #000; padding-top: 15px; }
 
-        /* ✅ न्यूज़ काउंटर (Top Right) */
-        .counter-box {
-            position: absolute; top: 50px; right: 0;
-            background: rgba(0, 0, 0, 0.85); color: #ffcc00;
-            padding: 15px 30px; font-size: clamp(20px, 3vw, 40px);
-            font-weight: 900; border-left: 10px solid #ffcc00;
-            box-shadow: -10px 10px 30px rgba(0,0,0,0.5); z-index: 15;
-        }
-
-        /* न्यूज़ बॉक्स */
-        .bottom-panel {
-            width: 100%; background: linear-gradient(to top, #000 85%, transparent);
-            padding: 50px 20px; border-top: 8px solid #ffcc00;
-        }
-
-        .headline-text {
-            font-size: clamp(24px, 4vw, 52px); color: #fff; text-align: center;
-            margin: 0; line-height: 1.4; font-weight: 700;
-            text-shadow: 2px 2px 10px #000; padding-top: 15px;
-        }
-
-        #overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #222, #000);
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; z-index: 9999; cursor: pointer; color: #ffcc00;
-        }
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999; cursor: pointer; color: #ffcc00; text-align: center; }
     </style>
 </head>
 <body>
 
     <div id="overlay" onclick="startStudio()">
-        <div style="border: 4px solid #ffcc00; padding: 50px; text-align: center; border-radius: 20px;">
-            <h1 style="font-size: 55px; margin: 0;">PTN NEWS STUDIO</h1>
-            <p style="color: white; font-size: 22px;">[ क्लिक करें - 25 हेडलाइंस शुरू करें ]</p>
+        <div style="border: 4px solid #ffcc00; padding: 50px;">
+            <h1 style="font-size: 50px;">PTN NEWS STUDIO</h1>
+            <p style="color:white;">[ न्यूज़ लोड करने के लिए यहाँ क्लिक करें ]</p>
+            <p id="status-msg" style="font-size: 18px; color: #aaa;">सर्वर से कनेक्ट हो रहा है...</p>
         </div>
     </div>
 
     <img id="news-bg" src="" alt="Background">
-
     <div class="main-container">
         <div class="breaking-header">ब्रेकिंग न्यूज़</div>
-        
         <div class="counter-box" id="news-counter">0 / 0</div>
-
         <div class="bottom-panel">
-            <p class="headline-text" id="news-headline">खबरें लोड हो रही हैं...</p>
+            <p class="headline-text" id="news-headline">खबरें लोड हो रही हैं, कृपया रुकें...</p>
         </div>
     </div>
 
@@ -86,57 +42,51 @@
         let index = 0;
         let audioCtx;
 
-        function initAudioEngine() {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            setInterval(() => { playBeat(55, 0.08, 0.4); }, 900);
-        }
-
-        function playBeat(freq, vol, duration) {
-            if(!audioCtx) return;
+        function playBeat() {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            const filter = audioCtx.createBiquadFilter();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            filter.type = 'lowpass';
-            filter.frequency.setValueAtTime(300, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
+            osc.frequency.setValueAtTime(55, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
         }
 
         async function fetchNews() {
-            const rssUrl = "https://www.bhaskar.com/rss-v1--category-1061.xml"; 
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=25`; 
-            
+            // हमने यहाँ Zee News का फीड इस्तेमाल किया है क्योंकि यह बहुत स्टेबल है
+            const rssUrl = "https://zeenews.india.com/rss/india-national-news.xml";
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&api_key=oy4vxt8m5pzzxt0mzz8c7z5z7x5pzzxzzzzzzz`;
+
             try {
                 const res = await fetch(apiUrl);
                 const data = await res.json();
-                if(data.status === 'ok') {
+                
+                if(data.status === 'ok' && data.items.length > 0) {
                     newsData = data.items;
-                    if(index === 0) runStudioLoop();
+                    document.getElementById('status-msg').innerText = "न्यूज़ तैयार है! क्लिक करें।";
+                    if(index === 0 && document.getElementById('overlay').style.display === 'none') runStudioLoop();
+                } else {
+                    throw new Error("No Data");
                 }
-            } catch(e) { console.log("Fetch Error"); }
+            } catch(e) {
+                document.getElementById('news-headline').innerText = "न्यूज़ लोड नहीं हो पाई। कृपया पेज रिफ्रेश करें।";
+                document.getElementById('status-msg').innerText = "सर्वर एरर। इंटरनेट चेक करें।";
+            }
         }
 
         function runStudioLoop() {
             if(newsData.length === 0) return;
             const item = newsData[index];
 
-            // ✅ काउंटर अपडेट करें
+            playBeat();
             document.getElementById('news-counter').innerText = (index + 1) + " / " + newsData.length;
-
-            // हेडलाइन और इमेज
             document.getElementById('news-headline').innerText = item.title;
+            
             const bgImg = document.getElementById('news-bg');
-            if(item.enclosure && item.enclosure.link) {
-                bgImg.src = item.enclosure.link;
-            } else if(item.thumbnail) {
-                bgImg.src = item.thumbnail;
-            }
+            bgImg.src = item.enclosure.link || item.thumbnail || "https://via.placeholder.com/1920x1080/cc0000/ffffff?text=PTN+NEWS";
 
-            // AI एंकर वॉइस
             window.speechSynthesis.cancel();
             const msg = new SpeechSynthesisUtterance("बड़ी खबर... " + item.title);
             msg.lang = 'hi-IN';
@@ -148,16 +98,21 @@
                     runStudioLoop();
                 }, 4000);
             };
-
             window.speechSynthesis.speak(msg);
         }
 
         function startStudio() {
+            if(newsData.length === 0) {
+                alert("अभी न्यूज़ लोड नहीं हुई है, कृपया एक सेकंड रुकें।");
+                return;
+            }
             document.getElementById('overlay').style.display = 'none';
-            initAudioEngine();
-            fetchNews();
+            setInterval(() => { playBeat(); }, 900);
+            runStudioLoop();
         }
 
+        // पेज लोड होते ही न्यूज़ लाना शुरू करें
+        fetchNews();
         setInterval(fetchNews, 600000);
     </script>
 </body>
