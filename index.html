@@ -3,67 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; font-family: 'Arial', sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; }
         
-        /* बैकग्राउंड इमेज */
         #news-bg { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             object-fit: cover; opacity: 0.5; filter: brightness(0.6);
-            transition: opacity 1s ease-in-out;
+            z-index: 1;
         }
 
-        /* न्यूज़ स्टूडियो फ्रेम */
-        .studio-frame {
+        .main-ui {
             position: relative; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: flex-end;
-            border: 12px solid #ffcc00; box-sizing: border-box; z-index: 10;
+            border: 10px solid #ffcc00; box-sizing: border-box; z-index: 10;
         }
 
-        /* टॉप ब्रेकिंग हेडलाइन */
-        .header-box {
-            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
-            background: #cc0000; color: white; padding: 15px 60px;
-            font-size: 70px; font-weight: 900; border: 5px solid #fff;
-            box-shadow: 0 0 30px rgba(255,0,0,0.8); letter-spacing: 5px;
-            animation: pulse 2s infinite;
+        .breaking-tag {
+            position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
+            background: #cc0000; color: white; padding: 20px 60px;
+            font-size: 80px; font-weight: bold; border: 5px solid #fff;
+            box-shadow: 0 0 30px #ff0000; animation: blink 1.5s infinite;
         }
 
-        /* न्यूज़ टेक्स्ट बॉक्स */
         .news-box {
-            width: 100%; background: linear-gradient(to top, rgba(0,0,0,1) 70%, transparent);
-            padding: 50px 20px; text-align: center;
+            width: 100%; background: linear-gradient(transparent, #000 30%);
+            padding: 60px 20px; text-align: center;
         }
 
         .news-text {
-            font-size: 60px; color: #ffcc00; font-weight: bold;
-            text-shadow: 3px 3px 10px #000; margin: 0; line-height: 1.3;
+            font-size: 55px; color: #ffcc00; font-weight: bold;
+            text-shadow: 3px 3px 10px #000; margin: 0;
         }
 
-        #start-overlay {
+        #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; color: #ffcc00; display: flex;
             justify-content: center; align-items: center; z-index: 1000;
             cursor: pointer; font-size: 40px; text-align: center;
         }
 
-        @keyframes pulse { 0% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } 100% { transform: translateX(-50%) scale(1); } }
+        @keyframes blink { 50% { opacity: 0.8; transform: translateX(-50%) scale(1.05); } }
     </style>
 </head>
 <body>
 
-    <div id="start-overlay" onclick="startNews()">
-        <div style="border: 5px solid #ffcc00; padding: 40px; border-radius: 20px;">
+    <div id="start-screen" onclick="launchNews()">
+        <div style="border: 4px solid #ffcc00; padding: 50px;">
             PTN NEWS STUDIO<br>
-            <span style="color:white; font-size: 25px;">[ यहाँ क्लिक करें ]</span>
+            <span style="color:white; font-size: 20px;">[ क्लिक करें और शुरू करें ]</span>
         </div>
     </div>
 
     <img id="news-bg" src="" alt="News Image">
 
-    <div class="studio-frame">
-        <div class="header-box">BREAKING NEWS</div>
+    <div class="main-ui">
+        <div class="breaking-tag">BREAKING NEWS</div>
         <div class="news-box">
-            <p class="news-text" id="headline">कनेक्ट हो रहा है...</p>
+            <p class="news-text" id="headline">खबरें लोड हो रही हैं...</p>
         </div>
     </div>
 
@@ -82,55 +77,53 @@
             const rssUrl = "https://www.bhaskar.com/rss-v1--category-1061.xml"; 
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
             try {
-                const res = await fetch(apiUrl);
-                const data = await res.json();
-                if(data.status === 'ok') {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                if (data.status === 'ok') {
                     newsList = data.items;
-                    showNews();
+                    playLoop();
                 }
-            } catch(e) { headlineEl.innerText = "इंटरनेट चेक करें..."; }
+            } catch (e) { headlineEl.innerText = "Check Connection..."; }
         }
 
-        function showNews() {
-            if(newsList.length === 0) return;
+        function playLoop() {
+            if (newsList.length === 0) return;
             const item = newsList[currentIndex];
 
-            // खबर अपडेट करें
+            // 1. स्क्रीन अपडेट
             headlineEl.innerText = item.title;
-            
-            // इमेज अपडेट करें
-            if(item.enclosure && item.enclosure.link) {
+            if (item.enclosure && item.enclosure.link) {
                 bgImg.src = item.enclosure.link;
-            } else {
-                bgImg.src = "https://via.placeholder.com/1920x1080/cc0000/ffffff?text=BREAKING+NEWS";
             }
 
-            // म्यूज़िक को हल्का रखें
-            bgMusic.volume = 0.2;
-
-            // AI आवाज़
+            // 2. एंकर की आवाज़
             const msg = new SpeechSynthesisUtterance("ब्रेकिंग न्यूज़... " + item.title);
             msg.lang = 'hi-IN';
             msg.rate = 0.9;
             
             msg.onend = () => {
-                // खबर खत्म होने पर 3 सेकंड का गैप
+                // खबर खत्म होने के 4 सेकंड बाद अगली खबर
                 setTimeout(() => {
                     currentIndex = (currentIndex + 1) % newsList.length;
-                    showNews();
-                }, 3000);
+                    playLoop();
+                }, 4000);
             };
 
             window.speechSynthesis.speak(msg);
         }
 
-        function startNews() {
-            document.getElementById('start-overlay').style.display = 'none';
+        function launchNews() {
+            // स्टार्ट स्क्रीन हटाएँ
+            document.getElementById('start-screen').style.display = 'none';
+            
+            // म्यूज़िक चालू करें (वॉल्यूम 30%)
+            bgMusic.volume = 0.3;
             bgMusic.play();
+            
             fetchNews();
         }
 
-        // हर 10 मिनट में ताज़ा खबरें
+        // हर 10 मिनट में ताज़ा खबरें लोड करें
         setInterval(fetchNews, 600000);
     </script>
 </body>
