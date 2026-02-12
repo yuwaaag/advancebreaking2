@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; }
+
+        #news-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.5; filter: blur(3px);
+            transition: opacity 1s ease-in-out;
+        }
+
+        .breaking-container {
+            position: relative; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            border: 10px solid #ffcc00; box-sizing: border-box; z-index: 10;
+        }
+
+        .header-box {
+            position: absolute; top: 50px; text-align: center;
+            background: rgba(204, 0, 0, 0.9); padding: 20px 60px;
+            border: 5px solid #ffcc00; animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px #ff0000; }
+            100% { transform: scale(1.05); box-shadow: 0 0 50px #ffcc00; }
+        }
+
+        .header-text { font-size: 80px; color: #fff; letter-spacing: 8px; margin: 0; }
+
+        .news-box {
+            width: 100%; background: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0.8));
+            padding: 40px; border-top: 8px solid #ffcc00;
+        }
+
+        .news-text {
+            font-size: 55px; color: #ffcc00; text-align: center;
+            margin: 0; line-height: 1.2; font-weight: bold;
+            text-shadow: 3px 3px 10px #000;
+        }
+
+        #start-btn {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); color: #ffcc00; font-size: 40px;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100; cursor: pointer; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="start-btn" onclick="startEverything()">
+    क्लिक करें <br> सनसनीखेज न्यूज़ शुरू करने के लिए
+</div>
+
+<img id="news-bg" src="" alt="Background">
+
+<div class="breaking-container">
+    <div class="header-box">
+        <p class="header-text">BREAKING NEWS</p>
+    </div>
+
+    <div class="news-box">
+        <center><div style="background:#fff; color:#cc0000; padding:10px 30px; font-size:30px; font-weight:bold; border-radius:5px; margin-bottom:10px;">बड़ी खबर</div></center>
+        <p class="news-text" id="headline">न्यूज़ लोड हो रही है...</p>
+    </div>
+</div>
+
+<audio id="bgMusic" loop preload="auto">
+    <source src="https://www.soundjay.com/free-music/sounds/action-movie-trailer-01.mp3" type="audio/mpeg">
+</audio>
+<audio id="alertSound" preload="auto">
+    <source src="https://www.soundjay.com/transportation/sounds/jet-passing-by-01.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    let newsList = [];
+    let currentIndex = 0;
+    const bgMusic = document.getElementById('bgMusic');
+    const alertSound = document.getElementById('alertSound');
+    const headlineElement = document.getElementById('headline');
+    const bgImage = document.getElementById('news-bg');
+
+    async function fetchNews() {
+        const rssUrl = "https://www.bhaskar.com/rss-v1--category-1061.xml"; 
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            if (data.status === 'ok') {
+                newsList = data.items;
+                showNextNews();
+            }
+        } catch (e) { console.log("RSS Error"); }
+    }
+
+    function showNextNews() {
+        if (newsList.length === 0) return;
+
+        const item = newsList[currentIndex];
+        
+        // 1. Play Transition Sound (सनसनी वाली आवाज़)
+        alertSound.currentTime = 0;
+        alertSound.volume = 0.8;
+        alertSound.play().catch(e => console.log("Sound error"));
+
+        // 2. Update Image
+        if (item.enclosure && item.enclosure.link) {
+            bgImage.src = item.enclosure.link;
+        } else if (item.thumbnail) {
+            bgImage.src = item.thumbnail;
+        }
+
+        // 3. Update Text
+        headlineElement.innerText = item.title;
+        
+        // 4. Voice Over
+        speakNews(item.title);
+
+        currentIndex = (currentIndex + 1) % newsList.length;
+        setTimeout(showNextNews, 12000);
+    }
+
+    function speakNews(text) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = "ब्रेकिंग न्यूज़... " + text;
+        msg.lang = 'hi-IN';
+        msg.rate = 0.9;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function startEverything() {
+        // ओवरले हटाना
+        document.getElementById('start-btn').style.display = 'none';
+        
+        // ऑडियो शुरू करना (Force Start)
+        bgMusic.volume = 0.3;
+        bgMusic.play().then(() => {
+            console.log("Music Started Successfully");
+        }).catch(err => {
+            console.log("Music failed to start:", err);
+        });
+
+        fetchNews();
+    }
+
+    // हर 5 मिनट में खबरें रिफ्रेश करें
+    setInterval(fetchNews, 300000);
+</script>
+
+</body>
+</html>
