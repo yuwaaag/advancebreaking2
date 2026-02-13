@@ -1,42 +1,493 @@
+<!DOCTYPE html>
+
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breaking News - Advanced</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+```
+    body, html { 
+        width: 1920px; 
+        height: 1080px; 
+        overflow: hidden; 
+        background: transparent; 
+        font-family: 'Arial Black', 'Impact', sans-serif; 
+    }
+
     .breaking-container {
-        width: 100%; height: 100%;
-        background: radial-gradient(circle, #ff0000 0%, #660000 100%);
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        border: 15px solid #ffcc00; box-sizing: border-box;
+        width: 100%; 
+        height: 100%;
+        background: radial-gradient(circle at center, #ff0000 0%, #8b0000 50%, #330000 100%);
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center; 
+        align-items: center;
+        border: 15px solid #ffcc00; 
+        position: relative;
         animation: pulse-bg 2s infinite alternate;
     }
 
     @keyframes pulse-bg {
-        0% { box-shadow: inset 0 0 50px #000; }
-        100% { box-shadow: inset 0 0 150px #000; }
+        0% { 
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8), 0 0 50px rgba(255,204,0,0.5); 
+        }
+        100% { 
+            box-shadow: inset 0 0 200px rgba(0,0,0,0.9), 0 0 80px rgba(255,204,0,0.8); 
+        }
     }
 
-    .header {
-        font-size: 130px; color: #fff; text-shadow: 5px 5px 20px #000;
-        letter-spacing: 10px; margin-bottom: 50px;
-        animation: bounceIn 1s infinite alternate;
+    /* Animated Background Elements */
+    .bg-particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
     }
 
-    @keyframes bounceIn {
-        from { transform: scale(0.95); }
-        to { transform: scale(1.05); }
+    .particle {
+        position: absolute;
+        background: rgba(255, 204, 0, 0.3);
+        border-radius: 50%;
+        animation: float 8s infinite ease-in-out;
     }
 
-    .news-box {
-        width: 85%; background: white; padding: 50px;
-        border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-        transform: skewX(-3deg); border-left: 25px solid #ffcc00;
-        min-height: 200px; display: flex; align-items: center; justify-content: center;
-    }
-
-    .news-text {
-        font-size: 65px; color: #cc0000; text-align: center;
-        margin: 0; line-height: 1.3; font-weight: bold;
+    @keyframes float {
+        0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+        50% { opacity: 1; }
     }
 
     .flash-tag {
-        background: #ffcc00; color: black; padding: 15px 50px;
-        font-size: 40px; position: absolute; top: 60px; left: 0;
-        font-weight: bold; box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+        background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%);
+        color: black; 
+        padding: 20px 60px;
+        font-size: 45px; 
+        position: absolute; 
+        top: 60px; 
+        left: 0;
+        font-weight: 900; 
+        box-shadow: 8px 8px 20px rgba(0,0,0,0.6);
+        border-right: 8px solid #cc0000;
+        animation: slideInLeft 1s ease-out, glow-flash 1.5s infinite;
+        z-index: 10;
+    }
+
+    @keyframes slideInLeft {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(0); }
+    }
+
+    @keyframes glow-flash {
+        0%, 100% { box-shadow: 8px 8px 20px rgba(0,0,0,0.6); }
+        50% { box-shadow: 8px 8px 40px rgba(255,204,0,1), 0 0 30px rgba(255,204,0,0.8); }
+    }
+
+    .header {
+        font-size: 140px; 
+        color: #fff; 
+        text-shadow: 
+            5px 5px 20px #000,
+            0 0 40px #ff0000,
+            0 0 60px #ff0000;
+        letter-spacing: 15px; 
+        margin-bottom: 60px;
+        animation: bounceIn 1.2s infinite alternate, textGlow 2s infinite;
+        position: relative;
+        z-index: 5;
+    }
+
+    @keyframes bounceIn {
+        from { transform: scale(0.92); }
+        to { transform: scale(1.05); }
+    }
+
+    @keyframes textGlow {
+        0%, 100% { text-shadow: 5px 5px 20px #000, 0 0 40px #ff0000; }
+        50% { text-shadow: 5px 5px 30px #000, 0 0 80px #ff0000, 0 0 100px #ffcc00; }
+    }
+
+    .news-box {
+        width: 85%; 
+        background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+        padding: 60px;
+        border-radius: 25px; 
+        box-shadow: 
+            0 25px 60px rgba(0,0,0,0.9),
+            inset 0 -10px 30px rgba(0,0,0,0.1);
+        transform: skewX(-2deg); 
+        border-left: 30px solid #ffcc00;
+        border-right: 5px solid #cc0000;
+        min-height: 250px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        position: relative;
+        z-index: 5;
+        animation: newsBoxEntry 0.8s ease-out;
+    }
+
+    @keyframes newsBoxEntry {
+        from { 
+            opacity: 0; 
+            transform: skewX(-2deg) translateY(50px) scale(0.9); 
+        }
+        to { 
+            opacity: 1; 
+            transform: skewX(-2deg) translateY(0) scale(1); 
+        }
+    }
+
+    .news-text {
+        font-size: 68px; 
+        color: #cc0000; 
+        text-align: center;
+        margin: 0; 
+        line-height: 1.4; 
+        font-weight: 900;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        animation: textFadeIn 0.6s ease-out;
+    }
+
+    @keyframes textFadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Live Indicator */
+    .live-indicator {
+        position: absolute;
+        top: 40px;
+        right: 60px;
+        background: #ff0000;
+        color: white;
+        padding: 15px 35px;
+        border-radius: 50px;
+        font-size: 32px;
+        font-weight: bold;
+        box-shadow: 0 5px 20px rgba(255,0,0,0.6);
+        animation: livePulse 1.5s infinite;
+        z-index: 10;
+    }
+
+    @keyframes livePulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .live-dot {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        background: white;
+        border-radius: 50%;
+        margin-right: 10px;
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 8px;
+        background: #ffcc00;
+        box-shadow: 0 0 15px rgba(255,204,0,0.8);
+        animation: progress 15s linear;
+        z-index: 10;
+    }
+
+    @keyframes progress {
+        from { width: 0%; }
+        to { width: 100%; }
+    }
+
+    /* Start Button */
+    .start-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.95);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        cursor: pointer;
+    }
+
+    .start-button {
+        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+        color: white;
+        border: 5px solid #ffcc00;
+        padding: 40px 100px;
+        font-size: 60px;
+        font-weight: bold;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: 0 10px 40px rgba(255,0,0,0.6);
+        animation: buttonPulse 1.5s infinite;
+        transition: all 0.3s;
+    }
+
+    .start-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 15px 60px rgba(255,0,0,1);
+    }
+
+    @keyframes buttonPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .start-text {
+        color: #ffcc00;
+        font-size: 35px;
+        margin-top: 30px;
+        animation: fadeInOut 2s infinite;
+    }
+
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+
+    /* Sound Icon */
+    .sound-indicator {
+        position: absolute;
+        bottom: 40px;
+        right: 40px;
+        font-size: 40px;
+        color: #ffcc00;
+        animation: soundWave 1s infinite;
+        z-index: 10;
+    }
+
+    @keyframes soundWave {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
     }
 </style>
+```
+
+</head>
+<body>
+
+<div class="start-overlay" id="startOverlay">
+    <div class="start-button">
+        ▶ START LIVE NEWS
+    </div>
+    <div class="start-text">क्लिक करें शुरू करने के लिए</div>
+</div>
+
+<div class="breaking-container">
+    <div class="bg-particles" id="particles"></div>
+
+```
+<div class="flash-tag">⚡ बड़ी खबर ⚡</div>
+
+<div class="live-indicator">
+    <span class="live-dot"></span>LIVE
+</div>
+
+<div class="header">BREAKING NEWS</div>
+
+<div class="news-box" id="newsBox">
+    <p class="news-text" id="headline">खबरें लोड हो रही हैं...</p>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="sound-indicator">🔊</div>
+```
+
+</div>
+
+<!-- Audio Elements -->
+
+<audio id="bgMusic" loop preload="auto">
+    <!-- Dramatic News Background Music -->
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_d1718ab41b.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="transitionSound" preload="auto">
+    <!-- Breaking News Alert Sound -->
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="startSound" preload="auto">
+    <!-- Whoosh/Impact Sound for Start -->
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_4e3b94ac8c.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    let newsList = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    
+    const bgMusic = document.getElementById('bgMusic');
+    const transitionSound = document.getElementById('transitionSound');
+    const startSound = document.getElementById('startSound');
+    const startOverlay = document.getElementById('startOverlay');
+    const progressBar = document.getElementById('progressBar');
+    const newsBox = document.getElementById('newsBox');
+
+    // Set volumes
+    bgMusic.volume = 0.3;
+    transitionSound.volume = 0.6;
+    startSound.volume = 0.5;
+
+    // Create floating particles
+    function createParticles() {
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = Math.random() * 10 + 5 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = Math.random() * 5 + 5 + 's';
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    // Fetch News from RSS
+    async function fetchNews() {
+        const rssUrl = "https://www.bhaskar.com/rss-v1--category-1061.xml";
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            if (data.status === 'ok' && data.items.length > 0) {
+                newsList = data.items;
+                if (!isPlaying) {
+                    showNextNews();
+                    isPlaying = true;
+                }
+            }
+        } catch (e) {
+            console.error("RSS Fetch Error:", e);
+            // Fallback news
+            newsList = [
+                { title: "भारत में नई तकनीक का विकास हुआ" },
+                { title: "खेल जगत में बड़ी उपलब्धि दर्ज" },
+                { title: "आर्थिक विकास में तेजी देखी गई" }
+            ];
+            if (!isPlaying) {
+                showNextNews();
+                isPlaying = true;
+            }
+        }
+    }
+
+    // Show Next News with Animation
+    function showNextNews() {
+        if (newsList.length === 0) return;
+
+        const headlineElement = document.getElementById('headline');
+        const currentTitle = newsList[currentIndex].title;
+
+        // Play transition sound
+        playTransitionSound();
+
+        // Animate news box
+        newsBox.style.animation = 'none';
+        setTimeout(() => {
+            newsBox.style.animation = 'newsBoxEntry 0.8s ease-out';
+        }, 10);
+
+        // Animate headline text
+        headlineElement.style.animation = 'none';
+        setTimeout(() => {
+            headlineElement.innerText = currentTitle;
+            headlineElement.style.animation = 'textFadeIn 0.6s ease-out';
+        }, 300);
+
+        // Reset and animate progress bar
+        progressBar.style.animation = 'none';
+        setTimeout(() => {
+            progressBar.style.animation = 'progress 15s linear';
+        }, 10);
+
+        // Text-to-Speech
+        speakNews(currentTitle);
+
+        // Move to next
+        currentIndex = (currentIndex + 1) % newsList.length;
+
+        // Schedule next news
+        setTimeout(showNextNews, 15000);
+    }
+
+    // Play Transition Sound
+    function playTransitionSound() {
+        transitionSound.currentTime = 0;
+        transitionSound.play().catch(e => console.log("Transition sound error:", e));
+    }
+
+    // Text-to-Speech
+    function speakNews(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance();
+            msg.text = "ब्रेकिंग न्यूज़... " + text;
+            msg.lang = 'hi-IN';
+            msg.rate = 0.85;
+            msg.pitch = 1;
+            msg.volume = 0.9;
+            
+            // Wait a moment before speaking
+            setTimeout(() => {
+                window.speechSynthesis.speak(msg);
+            }, 800);
+        }
+    }
+
+    // Start Everything
+    startOverlay.onclick = async () => {
+        // Play start sound
+        startSound.play().catch(e => console.log("Start sound error:", e));
+        
+        // Start background music
+        bgMusic.play().catch(e => console.log("BG music error:", e));
+        
+        // Create particles
+        createParticles();
+        
+        // Fetch and show news
+        await fetchNews();
+        
+        // Hide overlay
+        startOverlay.style.opacity = '0';
+        setTimeout(() => {
+            startOverlay.style.display = 'none';
+        }, 500);
+    };
+
+    // Auto refresh news list every 10 minutes
+    setInterval(fetchNews, 600000);
+
+    // Handle visibility change (pause/resume music)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            bgMusic.pause();
+        } else {
+            bgMusic.play().catch(e => console.log("Resume error:", e));
+        }
+    });
+</script>
+
+</body>
+</html>
