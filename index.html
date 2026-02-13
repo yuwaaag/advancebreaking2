@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Breaking News - Advanced</title>
+    <title>Breaking News - With Images</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -109,10 +109,11 @@
         50% { text-shadow: 5px 5px 30px #000, 0 0 80px #ff0000, 0 0 100px #ffcc00; }
     }
 
+    /* NEWS BOX WITH IMAGE LAYOUT */
     .news-box {
         width: 85%; 
         background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
-        padding: 60px;
+        padding: 40px;
         border-radius: 25px; 
         box-shadow: 
             0 25px 60px rgba(0,0,0,0.9),
@@ -120,10 +121,11 @@
         transform: skewX(-2deg); 
         border-left: 30px solid #ffcc00;
         border-right: 5px solid #cc0000;
-        min-height: 250px; 
+        min-height: 400px; 
         display: flex; 
         align-items: center; 
-        justify-content: center;
+        justify-content: space-between;
+        gap: 40px;
         position: relative;
         z-index: 5;
         animation: newsBoxEntry 0.8s ease-out;
@@ -140,12 +142,76 @@
         }
     }
 
+    /* IMAGE CONTAINER */
+    .news-image-container {
+        flex: 0 0 500px;
+        height: 350px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        border: 5px solid #ffcc00;
+        animation: imageSlideIn 0.8s ease-out;
+    }
+
+    @keyframes imageSlideIn {
+        from { 
+            opacity: 0; 
+            transform: translateX(-50px) scale(0.9); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateX(0) scale(1); 
+        }
+    }
+
+    .news-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .news-image:hover {
+        transform: scale(1.05);
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%);
+        pointer-events: none;
+    }
+
+    .no-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        color: white;
+    }
+
+    /* TEXT CONTAINER */
+    .news-text-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 20px;
+    }
+
     .news-text {
-        font-size: 68px; 
+        font-size: 58px; 
         color: #cc0000; 
-        text-align: center;
+        text-align: left;
         margin: 0; 
-        line-height: 1.4; 
+        line-height: 1.3; 
         font-weight: 900;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         animation: textFadeIn 0.6s ease-out;
@@ -154,6 +220,15 @@
     @keyframes textFadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
+    }
+
+    .news-source {
+        font-size: 24px;
+        color: #666;
+        margin-top: 15px;
+        font-style: italic;
+        font-weight: normal;
+        font-family: Arial, sans-serif;
     }
 
     /* Live Indicator */
@@ -276,6 +351,25 @@
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.2); }
     }
+
+    /* Loading Spinner for Images */
+    .image-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        border: 6px solid #ffcc00;
+        border-top: 6px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
 </style>
 ```
 
@@ -302,7 +396,18 @@
 <div class="header">BREAKING NEWS</div>
 
 <div class="news-box" id="newsBox">
-    <p class="news-text" id="headline">खबरें लोड हो रही हैं...</p>
+    <!-- Image Container -->
+    <div class="news-image-container" id="imageContainer">
+        <div class="image-loading"></div>
+        <img id="newsImage" class="news-image" alt="News Image" style="display: none;">
+        <div class="image-overlay"></div>
+    </div>
+    
+    <!-- Text Container -->
+    <div class="news-text-container">
+        <p class="news-text" id="headline">खबरें लोड हो रही हैं...</p>
+        <p class="news-source" id="newsSource">📰 Dainik Bhaskar</p>
+    </div>
 </div>
 
 <div class="progress-bar" id="progressBar"></div>
@@ -315,17 +420,14 @@
 <!-- Audio Elements -->
 
 <audio id="bgMusic" loop preload="auto">
-    <!-- Dramatic News Background Music -->
     <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_d1718ab41b.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="transitionSound" preload="auto">
-    <!-- Breaking News Alert Sound -->
     <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="startSound" preload="auto">
-    <!-- Whoosh/Impact Sound for Start -->
     <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_4e3b94ac8c.mp3" type="audio/mpeg">
 </audio>
 
@@ -340,6 +442,8 @@
     const startOverlay = document.getElementById('startOverlay');
     const progressBar = document.getElementById('progressBar');
     const newsBox = document.getElementById('newsBox');
+    const newsImage = document.getElementById('newsImage');
+    const imageContainer = document.getElementById('imageContainer');
 
     // Set volumes
     bgMusic.volume = 0.3;
@@ -362,6 +466,76 @@
         }
     }
 
+    // Extract image from content or use thumbnail
+    function extractImageFromNews(newsItem) {
+        // Try to get image from enclosure (RSS standard)
+        if (newsItem.enclosure && newsItem.enclosure.link) {
+            return newsItem.enclosure.link;
+        }
+        
+        // Try to get thumbnail
+        if (newsItem.thumbnail) {
+            return newsItem.thumbnail;
+        }
+        
+        // Try to extract from content/description HTML
+        if (newsItem.content || newsItem.description) {
+            const content = newsItem.content || newsItem.description;
+            const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+            if (imgMatch && imgMatch[1]) {
+                return imgMatch[1];
+            }
+        }
+        
+        // Return null if no image found
+        return null;
+    }
+
+    // Display news image with fallback
+    function displayNewsImage(imageUrl) {
+        const loadingSpinner = imageContainer.querySelector('.image-loading');
+        const placeholder = imageContainer.querySelector('.no-image-placeholder');
+        
+        // Remove old placeholder if exists
+        if (placeholder) {
+            placeholder.remove();
+        }
+        
+        if (imageUrl) {
+            // Show loading spinner
+            loadingSpinner.style.display = 'block';
+            newsImage.style.display = 'none';
+            
+            // Load new image
+            newsImage.onload = function() {
+                loadingSpinner.style.display = 'none';
+                newsImage.style.display = 'block';
+                newsImage.style.animation = 'imageSlideIn 0.8s ease-out';
+            };
+            
+            newsImage.onerror = function() {
+                // If image fails to load, show placeholder
+                loadingSpinner.style.display = 'none';
+                showImagePlaceholder();
+            };
+            
+            newsImage.src = imageUrl;
+        } else {
+            // No image available, show placeholder
+            loadingSpinner.style.display = 'none';
+            showImagePlaceholder();
+        }
+    }
+
+    // Show placeholder when no image available
+    function showImagePlaceholder() {
+        newsImage.style.display = 'none';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'no-image-placeholder';
+        placeholder.innerHTML = '📰';
+        imageContainer.appendChild(placeholder);
+    }
+
     // Fetch News from RSS
     async function fetchNews() {
         const rssUrl = "https://www.bhaskar.com/rss-v1--category-1061.xml";
@@ -372,6 +546,8 @@
             const data = await response.json();
             if (data.status === 'ok' && data.items.length > 0) {
                 newsList = data.items;
+                console.log('News loaded:', newsList.length, 'items');
+                console.log('First item:', newsList[0]); // Debug
                 if (!isPlaying) {
                     showNextNews();
                     isPlaying = true;
@@ -379,11 +555,20 @@
             }
         } catch (e) {
             console.error("RSS Fetch Error:", e);
-            // Fallback news
+            // Fallback news with placeholder images
             newsList = [
-                { title: "भारत में नई तकनीक का विकास हुआ" },
-                { title: "खेल जगत में बड़ी उपलब्धि दर्ज" },
-                { title: "आर्थिक विकास में तेजी देखी गई" }
+                { 
+                    title: "भारत में नई तकनीक का विकास हुआ",
+                    thumbnail: null
+                },
+                { 
+                    title: "खेल जगत में बड़ी उपलब्धि दर्ज",
+                    thumbnail: null
+                },
+                { 
+                    title: "आर्थिक विकास में तेजी देखी गई",
+                    thumbnail: null
+                }
             ];
             if (!isPlaying) {
                 showNextNews();
@@ -397,7 +582,12 @@
         if (newsList.length === 0) return;
 
         const headlineElement = document.getElementById('headline');
-        const currentTitle = newsList[currentIndex].title;
+        const currentNews = newsList[currentIndex];
+        const currentTitle = currentNews.title;
+        const imageUrl = extractImageFromNews(currentNews);
+
+        console.log('Showing news:', currentTitle);
+        console.log('Image URL:', imageUrl); // Debug
 
         // Play transition sound
         playTransitionSound();
@@ -407,6 +597,9 @@
         setTimeout(() => {
             newsBox.style.animation = 'newsBoxEntry 0.8s ease-out';
         }, 10);
+
+        // Display image
+        displayNewsImage(imageUrl);
 
         // Animate headline text
         headlineElement.style.animation = 'none';
@@ -448,7 +641,6 @@
             msg.pitch = 1;
             msg.volume = 0.9;
             
-            // Wait a moment before speaking
             setTimeout(() => {
                 window.speechSynthesis.speak(msg);
             }, 800);
@@ -479,7 +671,7 @@
     // Auto refresh news list every 10 minutes
     setInterval(fetchNews, 600000);
 
-    // Handle visibility change (pause/resume music)
+    // Handle visibility change
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             bgMusic.pause();
