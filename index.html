@@ -627,12 +627,105 @@
         transitionSound.play().catch(e => console.log("Transition sound error:", e));
     }
 
-    // Text-to-Speech
+    // Convert English digits to Hindi digits for proper pronunciation
+    function convertToHindiNumbers(text) {
+        // English to Hindi digit mapping
+        const digitMap = {
+            '0': 'शून्य', '1': 'एक', '2': 'दो', '3': 'तीन', '4': 'चार',
+            '5': 'पांच', '6': 'छह', '7': 'सात', '8': 'आठ', '9': 'नौ',
+            '10': 'दस', '11': 'ग्यारह', '12': 'बारह', '13': 'तेरह', '14': 'चौदह',
+            '15': 'पंद्रह', '16': 'सोलह', '17': 'सत्रह', '18': 'अठारह', '19': 'उन्नीस',
+            '20': 'बीस', '21': 'इक्कीस', '22': 'बाईस', '23': 'तेईस', '24': 'चौबीस',
+            '25': 'पच्चीस', '26': 'छब्बीस', '27': 'सत्ताईस', '28': 'अट्ठाईस', '29': 'उनतीस',
+            '30': 'तीस', '40': 'चालीस', '50': 'पचास', '60': 'साठ', '70': 'सत्तर',
+            '80': 'अस्सी', '90': 'नब्बे', '100': 'सौ', '1000': 'हजार'
+        };
+        
+        let result = text;
+        
+        // Replace common year patterns (like 2024, 2023)
+        result = result.replace(/\b20(\d{2})\b/g, function(match) {
+            let year = match;
+            return 'दो हजार ' + (digitMap[year.substring(2)] || convertNumber(parseInt(year.substring(2))));
+        });
+        
+        // Replace other multi-digit numbers
+        result = result.replace(/\b(\d+)\b/g, function(match) {
+            let num = parseInt(match);
+            if (digitMap[match]) {
+                return digitMap[match];
+            } else if (num > 0 && num < 100) {
+                return convertNumber(num);
+            } else if (num >= 100 && num < 1000) {
+                let hundreds = Math.floor(num / 100);
+                let remainder = num % 100;
+                let text = (digitMap[hundreds.toString()] || convertNumber(hundreds)) + ' सौ';
+                if (remainder > 0) {
+                    text += ' ' + (digitMap[remainder.toString()] || convertNumber(remainder));
+                }
+                return text;
+            } else if (num >= 1000) {
+                let thousands = Math.floor(num / 1000);
+                let remainder = num % 1000;
+                let text = (digitMap[thousands.toString()] || convertNumber(thousands)) + ' हजार';
+                if (remainder > 0) {
+                    if (remainder >= 100) {
+                        let hundreds = Math.floor(remainder / 100);
+                        let rem = remainder % 100;
+                        text += ' ' + (digitMap[hundreds.toString()] || convertNumber(hundreds)) + ' सौ';
+                        if (rem > 0) {
+                            text += ' ' + (digitMap[rem.toString()] || convertNumber(rem));
+                        }
+                    } else {
+                        text += ' ' + (digitMap[remainder.toString()] || convertNumber(remainder));
+                    }
+                }
+                return text;
+            }
+            return match;
+        });
+        
+        return result;
+    }
+    
+    // Helper function to convert numbers 1-99
+    function convertNumber(num) {
+        const ones = ['', 'एक', 'दो', 'तीन', 'चार', 'पांच', 'छह', 'सात', 'आठ', 'नौ'];
+        const tens = ['', '', 'बीस', 'तीस', 'चालीस', 'पचास', 'साठ', 'सत्तर', 'अस्सी', 'नब्बे'];
+        const teens = ['दस', 'ग्यारह', 'बारह', 'तेरह', 'चौदह', 'पंद्रह', 'सोलह', 'सत्रह', 'अठारह', 'उन्नीस'];
+        const twenties = ['बीस', 'इक्कीस', 'बाईस', 'तेईस', 'चौबीस', 'पच्चीस', 'छब्बीस', 'सत्ताईस', 'अट्ठाईस', 'उनतीस'];
+        const thirties = ['तीस', 'इकतीस', 'बत्तीस', 'तैंतीस', 'चौंतीस', 'पैंतीस', 'छत्तीस', 'सैंतीस', 'अड़तीस', 'उनतालीस'];
+        const forties = ['चालीस', 'इकतालीस', 'बयालीस', 'तैंतालीस', 'चौवालीस', 'पैंतालीस', 'छियालीस', 'सैंतालीस', 'अड़तालीस', 'उनचास'];
+        const fifties = ['पचास', 'इक्यावन', 'बावन', 'तिरपन', 'चौवन', 'पचपन', 'छप्पन', 'सत्तावन', 'अट्ठावन', 'उनसठ'];
+        const sixties = ['साठ', 'इकसठ', 'बासठ', 'तिरसठ', 'चौंसठ', 'पैंसठ', 'छियासठ', 'सड़सठ', 'अड़सठ', 'उनहत्तर'];
+        const seventies = ['सत्तर', 'इकहत्तर', 'बहत्तर', 'तिहत्तर', 'चौहत्तर', 'पचहत्तर', 'छिहत्तर', 'सतहत्तर', 'अठहत्तर', 'उन्यासी'];
+        const eighties = ['अस्सी', 'इक्यासी', 'बयासी', 'तिरासी', 'चौरासी', 'पचासी', 'छियासी', 'सत्तासी', 'अट्ठासी', 'नवासी'];
+        const nineties = ['नब्बे', 'इक्यानवे', 'बानवे', 'तिरानवे', 'चौरानवे', 'पचानवे', 'छियानवे', 'सत्तानवे', 'अट्ठानवे', 'निन्यानवे'];
+        
+        if (num < 10) return ones[num];
+        if (num >= 10 && num < 20) return teens[num - 10];
+        if (num >= 20 && num < 30) return twenties[num - 20];
+        if (num >= 30 && num < 40) return thirties[num - 30];
+        if (num >= 40 && num < 50) return forties[num - 40];
+        if (num >= 50 && num < 60) return fifties[num - 50];
+        if (num >= 60 && num < 70) return sixties[num - 60];
+        if (num >= 70 && num < 80) return seventies[num - 70];
+        if (num >= 80 && num < 90) return eighties[num - 80];
+        if (num >= 90 && num < 100) return nineties[num - 90];
+        
+        return num.toString();
+    }
+
+    // Text-to-Speech with Hindi number pronunciation
     function speakNews(text) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
+            
+            // Convert English numbers to Hindi words
+            const hindiText = convertToHindiNumbers(text);
+            
             const msg = new SpeechSynthesisUtterance();
-            msg.text = "ब्रेकिंग न्यूज़... " + text;
+            msg.text = "ब्रेकिंग न्यूज़... " + hindiText;
             msg.lang = 'hi-IN';
             msg.rate = 0.85;
             msg.pitch = 1;
